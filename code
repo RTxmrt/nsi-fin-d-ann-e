@@ -1,0 +1,41 @@
+import random
+
+class Joueur:
+    def __init__(self, nom):
+        self.nom, self.pv, self.defense = nom, 100, False
+
+    def attaquer(self, adversaire):
+        coup = random.randint(10, 20) // (2 if adversaire.defense else 1)
+        adversaire.pv -= coup
+        print(f"{self.nom} attaque {adversaire.nom} et lui inflige {coup} points de dégâts.")
+
+    def defendre(self):
+        self.defense = True
+        print(f"{self.nom} se met en position de défense.")
+
+    def __str__(self):
+        return f"{self.nom} (PV: {self.pv})"
+
+def main():
+    print("Bienvenue dans le jeu de combat textuel !")
+    joueurs = [Joueur(input(f"Entrez le nom du joueur {i+1} : ")) for i in range(2)]
+
+    while all(joueur.pv > 0 for joueur in joueurs):
+        print("\n" + "=" * 30, *joueurs, "=" * 30, sep="\n")
+        for joueur in joueurs:
+            print(f"\nTour de {joueur.nom} :")
+            action = input("Attaquer (a) ou se défendre (d) ? ").lower()
+            adversaire = joueurs[1] if joueur == joueurs[0] else joueurs[0]
+
+            if action == "a":
+                joueur.attaquer(adversaire)
+            elif action == "d":
+                joueur.defendre()
+
+            if adversaire.pv <= 0:
+                print(f"\n{joueur.nom} a remporté la victoire !")
+                return
+
+if __name__ == "__main__":
+    main()
+ 
