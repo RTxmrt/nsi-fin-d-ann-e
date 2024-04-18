@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Apr 17 19:52:04 2024
+
+@author: MARTIN.LALAUDE
+"""
+
+import tkinter as tk
 import random
 
 class Joueur:
@@ -7,35 +15,56 @@ class Joueur:
     def attaquer(self, adversaire):
         coup = random.randint(10, 20) // (2 if adversaire.defense else 1)
         adversaire.pv -= coup
-        print(f"{self.nom} attaque {adversaire.nom} et lui inflige {coup} points de dégâts.")
+        msg_box.insert(tk.END, f"{self.nom} attaque {adversaire.nom} et lui inflige {coup} points de dégâts.\n")
+        msg_box.see(tk.END)
 
     def defendre(self):
         self.defense = True
-        print(f"{self.nom} se met en position de défense.")
+        msg_box.insert(tk.END, f"{self.nom} se met en position de défense.\n")
+        msg_box.see(tk.END)
 
     def __str__(self):
         return f"{self.nom} (PV: {self.pv})"
 
+def jouer_tour(action_entry, joueurs):
+    action = action_entry.get().lower()
+    action_entry.delete(0, tk.END)
+
+    joueur = joueurs[0] if joueurs[0].nom == "Joueur 1" else joueurs[1]
+    adversaire = joueurs[1] if joueur == joueurs[0] else joueurs[0]
+
+    if action == "a":
+        joueur.attaquer(adversaire)
+    elif action == "d":
+        joueur.defendre()
+
+    if adversaire.pv <= 0:
+        msg_box.insert(tk.END, f"\n{joueur.nom} a remporté la victoire !\n")
+        action_entry.config(state=tk.DISABLED)
+
 def main():
-    print("Bienvenue dans le jeu de combat textuel !")
-    joueurs = [Joueur(input(f"Entrez le nom du joueur {i+1} : ")) for i in range(2)]
+    global msg_box
+    root = tk.Tk()
+    root.title("Jeu des neuilles")
 
-    while all(joueur.pv > 0 for joueur in joueurs):
-        print("\n" + "=" * 30, *joueurs, "=" * 30, sep="\n")
-        for joueur in joueurs:
-            print(f"\nTour de {joueur.nom} :")
-            action = input("Attaquer (a) ou se défendre (d) ? ").lower()
-            adversaire = joueurs[1] if joueur == joueurs[0] else joueurs[0]
+    msg_box = tk.Text(root, height=15, width=50)
+    msg_box.pack()
 
-            if action == "a":
-                joueur.attaquer(adversaire)
-            elif action == "d":
-                joueur.defendre()
+    action_label = tk.Label(root, text="Attaquer (a) ou se défendre (d) :")
+    action_label.pack()
 
-            if adversaire.pv <= 0:
-                print(f"\n{joueur.nom} a remporté la victoire !")
-                return
+    action_entry = tk.Entry(root, width=10)
+    action_entry.pack()
+
+    joueurs = [Joueur(f"Joueur {i+1}") for i in range(2)]
+
+    def bouton_clique():
+        jouer_tour(action_entry, joueurs)
+
+    bouton = tk.Button(root, text="Jouer tour", command=bouton_clique)
+    bouton.pack()
+
+    root.mainloop()
 
 if __name__ == "__main__":
     main()
- 
