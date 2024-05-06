@@ -3,7 +3,9 @@ pygame.init()
 
 class Game:
     def __init__(self):
+        self.all_players = pygame.sprite.Group()
         self.player = player(self)
+        self.all_players.add(self.player)
         self.all_monsters = pygame.sprite.Group()
         self.pressed = {}
         self.spawn_monster()
@@ -11,7 +13,7 @@ class Game:
     def check_collision(self, sprite, group):
         return pygame.sprite.spritecollide(sprite, group, False, pygame.sprite.collide_mask)
     def spawn_monster(self):
-        monster = Monster()
+        monster = Monster(self)
         self.all_monsters.add(monster)
 class player(pygame.sprite.Sprite):
     def __init__(self, game):
@@ -59,12 +61,15 @@ class Projectile(pygame.sprite.Sprite):
     def move(self):
         self.rect.x += self.velocity
         self.rotate()
+        if self.player.game.check_collision(self, self.player.game.all_monsters):
+            self.remove()
         if self.rect.x > 1080:
             self.remove()
 
 class Monster(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, game):
         super().__init__()
+        self.game = game
         self.health = 100
         self.max_health = 100
         self.attack = 5
@@ -73,9 +78,11 @@ class Monster(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, (200, 200))
         self.rect.x = 1000
         self.rect.y = 500
-        self.velocity = 2
+        self.velocity = 1
+
     def forward(self):
-        self.rect.x -= self.velocity
+        if not self.game.check_collision(self, self.game.all_players):
+            self.rect.x -= self.velocity
 
 
 pygame.init()
